@@ -23,9 +23,27 @@ SOFTWARE.
 """
 
 import random
+import os, csv
 from enum import Enum
 from axelrod.action import Action
 import numpy as np
+
+
+TRACK_PROBABILITY = False
+
+# Global dictionary to track sampling probabilities and strategies
+sampling_data = {}
+
+# CSV file path
+csv_file = "sampling_probabilities.csv"
+
+# Initialize CSV file if it doesn't exist
+if not os.path.exists(csv_file):
+    with open(csv_file, mode="w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(["Round", "Client ID", "Probability", "Strategy"])  # CSV Headers
+
+
 
 # global seed
 SEED = 42
@@ -180,7 +198,7 @@ def exponential_scaling(res_lvl, alpha=2.0):
     res_lvl = np.asarray(res_lvl)
     mask = res_lvl >= ResourceLevel.EMPTY.value
     result = np.zeros_like(res_lvl)
-    result[mask] = 1 - np.exp(-alpha * (res_lvl[mask] - ResourceLevel.EMPTY.value))
+    result[mask] = 1 - np.exp(-alpha * (res_lvl[mask] - ResourceLevel.LOW.value))
     return result
 
 
@@ -280,21 +298,17 @@ def random_action_choice(p: float = 0.5) -> Action:
         return Action.D
     
     
-def moran_sampling(scoreboard_list, available_clients, k, weight=1):
-    """
-    Perform Moran sampling based on IPD scores using a list-based scoreboard.
+def moran_sampling(scoreboard_list, available_clients, k, weight=1, round_number = 1, threshold=50):
 
-    Clients not present in the scoreboard will be assigned uniform selection probability.
-
-    Parameters:
-        scoreboard_list (list): List of dictionaries containing 'client_id' and other metadata.
-        available_clients (list): List of tuples where the second value (index 1) is the client ID.
-        k (int): Number of clients to sample.
-        weight (float): Weight parameter controlling fitness scaling.
-
-    Returns:
-        list: Selected client IDs for participation (corresponding to second value in available_clients).
-    """
+    # TRACKING HERE ->
+    global sampling_data  # Track probabilities globally
+    # TRACKING HERE ->
+    
+    if round_number < threshold:
+        random_warmup = True
+    else:
+        random_warmup = False
+     
     # Convert scoreboard_list into a dictionary for quick lookup
     #scoreboard_dict = {entry['client_id']: entry for entry in scoreboard_list}
     scoreboard_dict = {entry[0]: entry[1] for entry in scoreboard_list}
@@ -314,7 +328,7 @@ def moran_sampling(scoreboard_list, available_clients, k, weight=1):
     # Identify missing clients
     missing_mask = np.array([s is None for s in scores])
 
-    if np.all(missing_mask):  # If all clients are missing, assign uniform probabilities
+    if np.all(missing_mask) or random_warmup:  # If all clients are missing or warmup, assign uniform probabilities
         probabilities = np.ones(len(client_ids)) / len(client_ids)
     else:
         # Replace missing scores with the average score to avoid errors
@@ -331,6 +345,25 @@ def moran_sampling(scoreboard_list, available_clients, k, weight=1):
             fitness = 1.0 + weight * (scores.astype(float) - min_score) / (max_score - min_score)
             total_fitness = np.sum(fitness)
             probabilities = fitness / total_fitness
+    
+    if TRACK_PROBABILITY:
+        # Track probabilities and strategies
+        new_rows = []
+        for i, client_id in enumerate(client_ids):
+            strategy = scoreboard_dict.get(client_id, ('Unknown', 'Unknown'))[1]
+            if client_id not in sampling_data:
+                sampling_data[client_id] = {"probabilities": [], "strategy": strategy}
+            sampling_data[client_id]["probabilities"].append(probabilities[i])
+            sampling_data[client_id]["strategy"] = strategy
+
+            # Append to CSV data
+            new_rows.append([round_number, client_id, probabilities[i], strategy])
+
+        # Write to CSV
+        with open(csv_file, mode="a", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerows(new_rows)
+        
 
     # Sample k clients without replacement
     selected_indices = np.random.choice(len(client_ids), size=k, replace=False, p=probabilities)

@@ -1,6 +1,6 @@
-# FedT4T-Pro: Paper Title
+# FedT4T-Pro: Evolutionary Dynamics for Driving Cooperation in Federated Learning Systems
 
-This respository is an implementation of the algorithm proposed in the paper "**Paper Title**".
+This respository is an implementation of the algorithm proposed in the paper "**Evolutionary Dynamics for Driving Cooperation in Federated Learning Systems**".
 
 ![racf](/assets/racfl.png)
 
@@ -38,7 +38,8 @@ my_memory_one_strategy = axelrod.FirmButFair()
 my_resource_aware_strategy = ResourceAwareMemOnePlayer(my_memory_one_strategy, resource_scaling_func=synergy_threshold_scaling)
 ...
 # pass the strategy to our Flower clients
-flower_fedt4t_client = FedT4TClient( ..., ipd_strategy=my_resource_aware_strategy, ...)               
+flower_fedt4t_client = FedT4TClient( ..., ipd_strategy=my_resource_aware_strategy, ...)
+clients.append(flower_fedt4t_client)       
 ...
 # select the client subsampling-algorithm
 my_sampling_strategy = ClientSamplingStrategy.MORAN

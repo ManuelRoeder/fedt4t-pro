@@ -206,7 +206,7 @@ def server_fn(context: Context):
     # calculate the number of rounds based on the subsamüling strategy
     avg = 5
     # num_rounds = get_number_of_round_with_avg_meetups(avg, NUM_PARTITIONS, FL_STRATEGY_SUBSAMPLE)
-    num_rounds = 251
+    num_rounds = 151
     #print("Min. number of rounds to have on average " + str(avg) + " matches with " + str(NUM_PARTITIONS) + " participating clients and a subsampling rate of " + str(FL_STRATEGY_SUBSAMPLE) + " is "  +  str(num_rounds))
     # Iterated Prisoners Dilemma Tournament Server
     ipd_tournament_server= Ipd_TournamentServer(client_manager=Ipd_ClientManager(), strategy=strategy, num_rounds=num_rounds, sampling_strategy=util.ClientSamplingStrategy.MORAN)
@@ -250,8 +250,7 @@ def get_client_strategies(exp_str, mem_depth=1, resource_awareness=False):
         # ordinary axelrod set filtered by mem depth 1
         client_strategies = [s() for s  in axl.filtered_strategies(filterset={'memory_depth': mem_depth}, strategies=axl.ordinary_strategies)]
     elif exp_str == "m1_selected":
-        client_strategies = list()
-        
+
         # initiate one-by one
         strat1 = axl.GTFT(p=0.0)
         strat1.name = "Tit for Tat"
@@ -301,6 +300,62 @@ def get_client_strategies(exp_str, mem_depth=1, resource_awareness=False):
     elif exp_str == "axelrod_stochastic":
         # axelrod set filtered by mem depth 1 and stochastic property
         client_strategies = [s() for s in axl.filtered_strategies(filterset={'memory_depth': mem_depth, 'stochastic': True}, strategies=axl.all_strategies)]
+        
+    elif exp_str == "convergence_xprobing":
+        for i in range(1):
+                # initiate one-by one
+            strat1 = axl.GTFT(p=0.0)
+            strat1.name = "Cooperator" + "_" + str(i)
+            strat1.set_seed(util.SEED)
+            client_strategies.append(strat1)
+            
+            strat3 = axl.SoftJoss(0)
+            strat3.name = "Cooperator" + "_" + str(i)
+            strat3.set_seed(util.SEED)
+            client_strategies.append(strat3)
+            
+            strat3 = axl.SoftJoss(0)
+            strat3.name = "Cooperator" + "_" + str(i)
+            strat3.set_seed(util.SEED)
+            client_strategies.append(strat3)
+            
+            strat3 = axl.SoftJoss(0)
+            strat3.name = "Cooperator" + "_" + str(i)
+            strat3.set_seed(util.SEED)
+            client_strategies.append(strat3)
+            
+            #strat4 = axl.MemoryOnePlayer((0, 0, 0, 0), Action.D)
+            #strat4.name = "Defector"
+            #strat4.set_seed(util.SEED)
+        # client_strategies.append(strat4)
+            
+            strat4 = axl.MemoryOnePlayer((0.9, 0.5, 0.5, 0.1), Action.C)
+            strat4.name = "Cooperator" + "_" + str(i)
+            strat4.set_seed(util.SEED)
+            client_strategies.append(strat4)
+            
+            strat5 = axl.GTFT(p=0.33)
+            strat5.name = "Cooperator" + "_" + str(i)
+            strat5.set_seed(util.SEED)
+            client_strategies.append(strat5)
+            
+            strat6 = axl.GTFT(p=0.75)
+            strat6.name = "Cooperator" + "_" + str(i)
+            strat6.set_seed(util.SEED)
+            client_strategies.append(strat6)
+            
+            
+            strat8 = axl.FirmButFair()
+            strat8.name = "Cooperator" + "_" + str(i)
+            strat8.set_seed(util.SEED)
+            client_strategies.append(strat8)
+            
+        for i in range(8):
+            strat2 = axl.StochasticWSLS(0)
+            strat2.name = "Defector" + "_" + str(i)
+            strat2.set_seed(util.SEED)
+            client_strategies.append(strat2)
+
     
     # extend w random
     random_player = RandomIPDPlayer()
@@ -322,7 +377,7 @@ def get_client_strategies(exp_str, mem_depth=1, resource_awareness=False):
 ###################### MAIN TRACK ######################
 
 # initialize strategies with memory_depth eq. 1
-client_strategies = get_client_strategies("m1_selected", mem_depth=strategy_mem_depth, resource_awareness=True)
+client_strategies = get_client_strategies("convergence_xprobing", mem_depth=strategy_mem_depth, resource_awareness=True)
 
 # mix list
 random.shuffle(client_strategies)

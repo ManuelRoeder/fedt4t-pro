@@ -53,7 +53,6 @@ from util import generate_hash, actions_to_string, ClientSamplingStrategy, moran
 from ipd_tournament_strategy import Ipd_TournamentStrategy
 
 USE_CANTOR_PAIRING = False # use cantor hashing or free-text transmission of match id
-MORAN_RANDOM_WARMUP_ROUNDS = 1
 
 FitResultsAndFailures = tuple[
     list[tuple[ClientProxy, FitRes]],
@@ -107,7 +106,7 @@ class Ipd_ClientManager(SimpleClientManager):
             )
             return []
 
-        sampled_cids = moran_sampling(scoreboard,resolved_clients, num_clients)#random.sample(available_cids, num_clients)
+        sampled_cids = moran_sampling(scoreboard_list=scoreboard, available_clients=resolved_clients, k=num_clients, round_number=server_round, threshold=50)#random.sample(available_cids, num_clients)
         return [self.clients[cid] for cid in sampled_cids]     
 
 
@@ -134,7 +133,7 @@ class Ipd_TournamentServer(Server):
         tuple[Optional[Parameters], dict[str, Scalar], FitResultsAndFailures]
     ]:
         """Perform a single round of federated averaging."""
-        if self.sampling_strategy == ClientSamplingStrategy.MORAN and server_round > MORAN_RANDOM_WARMUP_ROUNDS:
+        if self.sampling_strategy == ClientSamplingStrategy.MORAN:
             # Get clients and their respective instructions from strategy
             client_instructions = self.strategy.configure_fit_moran(
                 server_round=server_round,
@@ -143,13 +142,6 @@ class Ipd_TournamentServer(Server):
                 scoreboard= self.ipd_scoreboard_dict
             )
         else:
-            # Get clients and their respective instructions from strategy
-            log(
-                INFO,
-                "Moran Sampling: Randomize client selection in round %s up to %s",
-                str(server_round),
-                str(MORAN_RANDOM_WARMUP_ROUNDS)
-            )
             client_instructions = self.strategy.configure_fit(
                 server_round=server_round,
                 parameters=self.parameters,
@@ -210,7 +202,7 @@ class Ipd_TournamentServer(Server):
             scoreboard_str, _ = get_clients_score_overview(self.ipd_scoreboard_dict)
             log(INFO, scoreboard_str)
             #plot_strategy_score_differences_matrix(self.ipd_scoreboard_dict)
-            save_strategy_score_differences_matrix2(self.ipd_scoreboard_dict, plot_directory="plots", filename= str(server_round) + "_confusion_matrix.png")
+            #save_strategy_score_differences_matrix2(self.ipd_scoreboard_dict, plot_directory="plots", filename= str(server_round) + "_confusion_matrix.png")
             custom_colors = {
                 "Res.M1 | Forgiving TFT": "#17becf",  # Teal
                 "Res.M1 | Firm But Fair": "#9467bd",  # Purple
@@ -221,8 +213,8 @@ class Ipd_TournamentServer(Server):
                 "Res.M1 | Grim": "#d62728",  # Red
                 "Res.M1 | Contributor": "#bcbd22",  # Yellow-Green
             }
-            save_strategy_total_scores_over_rounds_with_focus(self.ipd_scoreboard_dict, plot_directory="plots", filename= str(server_round) + "_scoring_plot_foc.pdf")
-            plot_cumulative_cooperations_over_rounds_with_focus(self.ipd_scoreboard_dict, plot_directory="plots", filename= str(server_round) + "_coop_plot.pdf", vertical_lines=[50, 100, 150], exclude_from_focus=["Res.M1 | Defector"], focus_range=(140, 250), custom_colors=custom_colors)
+            #save_strategy_total_scores_over_rounds_with_focus(self.ipd_scoreboard_dict, plot_directory="plots", filename= str(server_round) + "_scoring_plot_foc.pdf")
+            #plot_cumulative_cooperations_over_rounds_with_focus(self.ipd_scoreboard_dict, plot_directory="plots", filename= str(server_round) + "_coop_plot.pdf", vertical_lines=[50, 100, 150], exclude_from_focus=["Res.M1 | Defector"], focus_range=(140, 250), custom_colors=custom_colors)
             #plot_interaction_graph(self.ipd_scoreboard_dict, plot_directory="plots", filename= str(server_round) + "_interaction_graph.png" )
             #save_average_score_per_client_over_rounds(self.ipd_scoreboard_dict, plot_directory="plots", filename= str(server_round) + "_scoring_plot_avg.png")
             #plot_average_score_per_strategy_over_rounds(self.ipd_scoreboard_dict, plot_directory="plots", filename= str(server_round) + "_scoring_plot_avg.png")

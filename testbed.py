@@ -14,6 +14,31 @@ NUM_GAMES = 20
 
 random.seed(42)
 
+import pandas as pd
+import seaborn as sns
+from ridgeplot import ridgeplot
+import plotly.io as pio
+
+
+def plot_ridge(csv_file):
+    df = pd.read_csv(csv_file)
+
+    plt.figure(figsize=(10, 6))
+    unique_strategies = df["Strategy"].unique()
+    palette = sns.color_palette("husl", len(unique_strategies))  # Generate unique colors
+
+    sns.set(style="whitegrid")
+    g = sns.FacetGrid(df, row="Strategy", hue="Strategy", aspect=4, palette=palette, height=1.5)
+    g.map(sns.kdeplot, "Round", bw_adjust=0.5, fill=True, alpha=0.7)
+
+    g.set_titles(row_template="{row_name}")  # Show strategy name
+    g.set(yticks=[], ylabel="")
+    g.despine(left=True, bottom=True)
+    plt.xlabel("Rounds")
+    plt.suptitle("Evolution of Sampling Probabilities Across Rounds", fontsize=14)
+    plt.savefig("output.pdf",format="pdf", bbox_inches='tight', dpi=1200)  # Save with tight layout
+    plt.show()
+
 def visualize_scaling():
     # Define parameters
     E_tilde = np.linspace(0, 1.0, 500)  # E_tilde from 0 to 1.0
@@ -108,9 +133,6 @@ def main():
 
     # initialize player
     client_player = axl.StochasticWSLS(0)
-    #client_player.name = "Random"
-    #client_player = axl.GTFT(p=0.0)
-    #client_player.name = "T4T"
     client_player.set_seed(42)
     
     res_aware_client_player = ResourceAwareMemOnePlayer(player_instance=copy.deepcopy(client_player),
@@ -121,5 +143,6 @@ def main():
     
     
 if __name__ == '__main__':
-    visualize_scaling()
+    #visualize_scaling()
+    #plot_ridge("sampling_probabilities_test.csv")
     main()

@@ -1,7 +1,7 @@
 """
 MIT License
 
-Copyright (c) 2024 Manuel Roeder
+Copyright (c) 2025 Manuel Roeder
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@ from model import Net
 import util
 
 RESOURCE_DECREASE_ENABLED = True
-RES_DECREASE_ROUNDS = [50, 100, 150]
+RES_DECREASE_ROUNDS = [15, 50, 100]
 
 class FedT4TClient(NumPyClient):
     def __init__(self, trainloader, valloader, ipd_strategy: axl.Player, client_id) -> None:
