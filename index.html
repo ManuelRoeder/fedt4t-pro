@@ -1,0 +1,1943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FedT4T-Pro: Evolutionary Dynamics for Federated Learning</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --primary-glow: rgba(79, 70, 229, 0.15);
+            --secondary: #06b6d4;
+            --secondary-dark: #0e7490;
+            --tertiary: #6366f1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #171717;
+            --darker: #0f0f0f;
+            --light: #f9fafb;
+            --gray: #6b7280;
+            --card-bg: rgba(24, 24, 27, 0.8);
+            --card-border: rgba(63, 63, 70, 0.4);
+            --nav-bg: rgba(24, 24, 27, 0.9);
+            --grid-bg: rgba(17, 24, 39, 0.7);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Exo 2', sans-serif;
+            line-height: 1.6;
+            color: var(--light);
+            background-color: var(--darker);
+            background-image: 
+                radial-gradient(circle at 20% 35%, rgba(76, 29, 149, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 75% 65%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
+            background-attachment: fixed;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.9), rgba(55, 48, 163, 0.9));
+            position: relative;
+            color: white;
+            padding: 60px 0 30px 0;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E"),
+                linear-gradient(135deg, rgba(79, 70, 229, 0.8), rgba(55, 48, 163, 0.8));
+            z-index: -1;
+        }
+        
+        h1, h2, h3, h4 {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.5px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(to right, #fff, #c7d2fe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin: 30px 0 15px;
+            color: var(--secondary);
+            position: relative;
+            display: inline-block;
+        }
+        
+        h2::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            height: 3px;
+            width: 60%;
+            background: linear-gradient(to right, var(--secondary), transparent);
+        }
+        
+        h3 {
+            font-size: 1.4rem;
+            margin: 20px 0 10px;
+            color: var(--light);
+        }
+        
+        p {
+            margin-bottom: 20px;
+            color: #d1d5db;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(to right, var(--primary), var(--secondary), transparent);
+        }
+        
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(to bottom, var(--primary), transparent);
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 10px rgba(79, 70, 229, 0.3);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.6s;
+            z-index: -1;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.5);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+            box-shadow: 0 2px 10px rgba(6, 182, 212, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--secondary-dark);
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.5);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            box-shadow: 0 2px 10px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-danger:hover {
+            background-color: #b91c1c;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.5);
+        }
+        
+        .flex-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+        
+        .flex-item {
+            flex: 1 1 48%;
+            min-width: 300px;
+        }
+        
+        .simulation-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .simulation-canvas {
+            flex: 2;
+            min-width: 300px;
+            overflow: hidden;
+        }
+        
+        .simulation-controls {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        #clientGrid {
+            width: 100%;
+            height: 450px;
+            position: relative;
+            background-color: var(--grid-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        #clientGrid::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: 0;
+        }
+        
+        .client {
+            position: absolute;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 2;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .cooperative {
+            background: radial-gradient(circle at 30% 30%, var(--success), #059669);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+        }
+        
+        .cooperative::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #10b981;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+        }
+        
+        .defective {
+            background: radial-gradient(circle at 30% 30%, var(--danger), #b91c1c);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+        }
+        
+        .defective::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #ef4444;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+        }
+        
+        .selected {
+            border: 2px solid white;
+            box-shadow: 
+                0 0 0 2px var(--primary),
+                0 0 20px var(--primary-glow);
+            transform: scale(1.2);
+            z-index: 3;
+        }
+        
+        .client-connection {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.05);
+            height: 2px;
+            transform-origin: left center;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+        
+        .connection-cooperative {
+            background-color: rgba(16, 185, 129, 0.3);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+        }
+        
+        .connection-defective {
+            background-color: rgba(239, 68, 68, 0.3);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+        }
+        
+        .control-group {
+            margin-bottom: 24px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        select, input[type="range"], .strategy-dropdown {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background-color: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            color: white;
+            transition: all 0.3s ease;
+            appearance: none;
+            margin-bottom: 8px;
+            font-family: 'Exo 2', sans-serif;
+        }
+        
+        select:focus, input[type="range"]:focus, .strategy-dropdown:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-glow);
+        }
+        
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23fff' d='M0 0L4 4L8 0'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 10px;
+            padding-right: 30px;
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 10px;
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 5px;
+            background-image: linear-gradient(to right, var(--primary) 0%, var(--secondary) 100%);
+            background-size: 70% 100%;
+            background-repeat: no-repeat;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .range-value {
+            text-align: right;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .strategy-list {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+        
+        .strategy-list li {
+            margin-bottom: 10px;
+            padding: 12px;
+            background-color: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .strategy-list li:hover {
+            background-color: rgba(30, 41, 59, 0.7);
+            transform: translateX(5px);
+        }
+        
+        .strategy-dropdown {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        
+        .cooperative-tag {
+            background-color: var(--success);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+        }
+        
+        .cooperative-tag::before {
+            content: '•';
+            display: inline-block;
+            margin-right: 5px;
+            font-size: 1.2rem;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .defective-tag {
+            background-color: var(--danger);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+        }
+        
+        .defective-tag::before {
+            content: '•';
+            display: inline-block;
+            margin-right: 5px;
+            font-size: 1.2rem;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+        
+        .result-panel {
+            background-color: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+        }
+        
+        .result-header {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--secondary);
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            position: relative;
+            padding-left: 15px;
+        }
+        
+        .result-header::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--secondary);
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(17, 24, 39, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(to right, var(--primary), var(--secondary), transparent);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            letter-spacing: 0.5px;
+        }
+        
+        #resourceLevel {
+            width: 100%;
+            height: 8px;
+            background-color: rgba(17, 24, 39, 0.8);
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #resourceIndicator {
+            height: 100%;
+            background: linear-gradient(90deg, var(--warning), var(--success));
+            width: 100%;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #resourceIndicator::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg, 
+                rgba(255, 255, 255, 0) 0%, 
+                rgba(255, 255, 255, 0.2) 50%, 
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: shimmer 1.5s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 220px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            background: rgba(17, 24, 39, 0.4);
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid rgba(100, 116, 139, 0.2);
+        }
+        
+        .moran-impact-chart {
+            width: 100%;
+            height: 200px;
+            margin-top: 10px;
+        }
+        
+        footer {
+            background-color: var(--dark);
+            color: #94a3b8;
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--primary), var(--secondary), transparent);
+        }
+        
+        .resource-scale-container {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: rgba(17, 24, 39, 0.4);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+        }
+        
+        .resource-scale {
+            width: 100%;
+            height: 40px;
+            position: relative;
+            margin-top: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .scale-marker {
+            position: absolute;
+            height: 100%;
+            border-right: 2px dashed rgba(255, 255, 255, 0.2);
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+        
+        .scale-marker span {
+            position: absolute;
+            top: -25px;
+            left: 5px;
+            white-space: nowrap;
+            font-family: 'Exo 2', sans-serif;
+        }
+        
+        .scale-level {
+            position: absolute;
+            height: 100%;
+            top: 0;
+        }
+        
+        .scale-low {
+            left: 0;
+            width: 25%;
+            background-color: rgba(244, 63, 94, 0.2);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .scale-moderate {
+            left: 25%;
+            width: 25%;
+            background-color: rgba(234, 179, 8, 0.2);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .scale-high {
+            left: 50%;
+            width: 25%;
+            background-color: rgba(16, 185, 129, 0.15);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .scale-full {
+            left: 75%;
+            width: 25%;
+            background-color: rgba(16, 185, 129, 0.3);
+        }
+        
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 15px;
+            background-color: rgba(17, 24, 39, 0.3);
+            border-radius: 8px;
+            padding: 5px;
+        }
+        
+        .tab-btn {
+            padding: 12px 20px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 500;
+            margin-right: 5px;
+            color: #94a3b8;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            font-family: 'Exo 2', sans-serif;
+        }
+        
+        .tab-btn:hover {
+            color: white;
+            background-color: rgba(100, 116, 139, 0.1);
+        }
+        
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background-color: rgba(17, 24, 39, 0.5);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            backdrop-filter: blur(5px);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            background-color: rgba(17, 24, 39, 0.6);
+            border-radius: 10px;
+            border: 1px solid rgba(100, 116, 139, 0.2);
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #e2e8f0;
+        }
+        
+        .results-table th, 
+        .results-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(100, 116, 139, 0.2);
+        }
+        
+        .results-table th {
+            background-color: rgba(30, 41, 59, 0.8);
+            color: var(--secondary);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .results-table tr:hover {
+            background-color: rgba(30, 41, 59, 0.5);
+        }
+        
+        .results-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .client-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .client-card {
+            background-color: rgba(17, 24, 39, 0.6);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .client-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .client-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(100, 116, 139, 0.2);
+        }
+        
+        .client-id {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .client-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .client-stat {
+            padding: 8px;
+            background-color: rgba(30, 41, 59, 0.5);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .client-stat-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .client-stat-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            width: 100%;
+            background-color: rgba(17, 24, 39, 0.6);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 3px;
+        }
+        
+        .client-editor {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: rgba(17, 24, 39, 0.6);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 12px;
+        }
+        
+        .client-editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .client-editor-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .client-editor-title::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            margin-right: 10px;
+            box-shadow: 0 0 10px var(--secondary);
+        }
+        
+        .client-editor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .client-item {
+            background-color: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .client-item:hover {
+            background-color: rgba(30, 41, 59, 0.7);
+        }
+        
+        .client-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .client-item-id {
+            font-weight: 600;
+            color: white;
+        }
+        
+        .moran-visualization {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: rgba(17, 24, 39, 0.6);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 12px;
+        }
+        
+        .probability-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 5px;
+            margin-top: 15px;
+        }
+        
+        .probability-cell {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .probability-value {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .probability-bg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, var(--primary), transparent);
+            transition: height 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .flex-item {
+                flex: 1 1 100%;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .client-editor-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>FedT4T-Pro Simulation</h1>
+            <p>Evolutionary Dynamics for Driving Cooperation in Federated Learning Systems</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>About This Simulation</h2>
+            <p>This interactive simulation demonstrates the key concepts of FedT4T-Pro, a framework that uses game theory principles to encourage cooperation in Federated Learning environments. The simulation visualizes how different client strategies perform under varying resource constraints and how the Moran sampling method incentivizes cooperative behavior.</p>
+            
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="overview">Overview</button>
+                    <button class="tab-btn" data-tab="ipd">Prisoner's Dilemma</button>
+                    <button class="tab-btn" data-tab="resources">Resource Scaling</button>
+                    <button class="tab-btn" data-tab="sampling">Moran Sampling</button>
+                </div>
+                
+                <div id="overview" class="tab-content active">
+                    <p>FedT4T-Pro addresses key challenges in Federated Learning:</p>
+                    <ul>
+                        <li><strong>Client Cooperation:</strong> Using the Iterated Prisoner's Dilemma to model client interactions</li>
+                        <li><strong>Resource Awareness:</strong> Adapting client participation based on available resources</li>
+                        <li><strong>Incentive Mechanisms:</strong> Implementing a selection strategy based on evolutionary dynamics</li>
+                    </ul>
+                    <p>Click the "Start Simulation" button below to see these concepts in action.</p>
+                </div>
+                
+                <div id="ipd" class="tab-content">
+                    <p>The Iterated Prisoner's Dilemma (IPD) is a game theory framework that models repeated encounters between two players who must choose to either cooperate or defect. In our Federated Learning context:</p>
+                    <ul>
+                        <li><strong>Cooperate:</strong> The client trains on local data and contributes to the global model</li>
+                        <li><strong>Defect:</strong> The client saves resources by not performing local training</li>
+                    </ul>
+                    <p>The payoff matrix for IPD in our simulation is:</p>
+                    <ul>
+                        <li>Both cooperate: R = 3 (Reward)</li>
+                        <li>Both defect: P = 1 (Punishment)</li>
+                        <li>One defects, one cooperates: T = 5 (Temptation to defect), S = 0 (Sucker's payoff)</li>
+                    </ul>
+                </div>
+                
+                <div id="resources" class="tab-content">
+                    <p>Resource awareness is integrated into the client decision-making process through scaling functions that adjust cooperation probability based on resource availability:</p>
+                    
+                    <div class="resource-scale-container">
+                        <h3>Resource Levels</h3>
+                        <div class="resource-scale">
+                            <div class="scale-level scale-low"></div>
+                            <div class="scale-level scale-moderate"></div>
+                            <div class="scale-level scale-high"></div>
+                            <div class="scale-level scale-full"></div>
+                            
+                            <div class="scale-marker" style="left: 0%;">
+                                <span>0 (Empty)</span>
+                            </div>
+                            <div class="scale-marker" style="left: 25%;">
+                                <span>0.25 (Low)</span>
+                            </div>
+                            <div class="scale-marker" style="left: 50%;">
+                                <span>0.5 (Moderate)</span>
+                            </div>
+                            <div class="scale-marker" style="left: 75%;">
+                                <span>0.75 (High)</span>
+                            </div>
+                            <div class="scale-marker" style="left: 100%;">
+                                <span>1.0 (Full)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p>Our simulation uses the Synergy Threshold scaling function, which introduces a threshold below which clients are discouraged from participating. This function helps prevent under-resourced clients from contributing to model training.</p>
+                </div>
+                
+                <div id="sampling" class="tab-content">
+                    <p>Moran Sampling is an incentive mechanism inspired by evolutionary biology that promotes cooperation by systematically excluding non-cooperative clients.</p>
+                    
+                    <p>The key components of Moran Sampling are:</p>
+                    <ul>
+                        <li><strong>Fitness Calculation:</strong> Based on client's IPD score</li>
+                        <li><strong>Selection Probability:</strong> Clients with higher fitness (cooperative behavior) have higher chances of being selected</li>
+                        <li><strong>Natural Selection Effect:</strong> Over time, cooperative strategies become dominant</li>
+                    </ul>
+                    
+                    <p>This sampling method provides a self-regulating mechanism that ensures client participation is both merit-based and adaptive to real-world constraints.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-container">
+            <div class="flex-item card">
+                <h2>Simulation Controls</h2>
+                
+                <div class="control-group">
+                    <label for="clientCountSelect">Number of Clients:</label>
+                    <select id="clientCountSelect">
+                        <option value="8">8 Clients</option>
+                        <option value="12">12 Clients</option>
+                        <option value="16" selected>16 Clients</option>
+                        <option value="24">24 Clients</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="samplingMethodSelect">Client Selection Strategy:</label>
+                    <select id="samplingMethodSelect">
+                        <option value="random">Random Sampling</option>
+                        <option value="moran">Moran Sampling</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="moranWeightSlider">Moran Selection Weight:</label>
+                    <input type="range" id="moranWeightSlider" min="0" max="2" value="1" step="0.1">
+                    <div class="range-value"><span id="moranWeightValue">1.0</span></div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="resourceLevelSlider">Resource Level:</label>
+                    <input type="range" id="resourceLevelSlider" min="0" max="100" value="100" step="1">
+                    <div class="range-value"><span id="resourceLevelValue">100%</span></div>
+                    <div id="resourceLevel">
+                        <div id="resourceIndicator"></div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="roundCountSlider">Training Round:</label>
+                    <input type="range" id="roundCountSlider" min="1" max="100" value="1" step="1" disabled>
+                    <div class="range-value"><span id="roundCountValue">1/100</span></div>
+                </div>
+                
+                <div>
+                    <button id="startSimulationBtn" class="btn">Start Simulation</button>
+                    <button id="pauseSimulationBtn" class="btn" disabled>Pause</button>
+                    <button id="resetSimulationBtn" class="btn btn-danger" disabled>Reset</button>
+                </div>
+            </div>
+            
+            <div class="flex-item card">
+                <h2>Client Strategy Editor</h2>
+                <p>Customize the strategies for individual clients or groups:</p>
+                
+                <div class="control-group">
+                    <label for="bulkStrategySelect">Bulk Strategy Assignment:</label>
+                    <select id="bulkStrategySelect">
+                        <option value="">Select a strategy...</option>
+                        <option value="titfortat">Tit for Tat (TFT)</option>
+                        <option value="wsls">Win-Stay Lose-Shift (WSLS)</option>
+                        <option value="grim">Grim</option>
+                        <option value="cooperator">Cooperator (Cu)</option>
+                        <option value="forgiving">Forgiving TFT</option>
+                        <option value="random">Random</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <button id="applyAllBtn" class="btn">Apply to All</button>
+                    <button id="applySelectedBtn" class="btn">Apply to Selected</button>
+                    <button id="balanceStrategiesBtn" class="btn btn-secondary">Balance Strategies</button>
+                </div>
+                
+                <div class="strategy-list" id="strategyReference">
+                    <li>
+                        <span>Tit for Tat (TFT)</span>
+                        <span class="cooperative-tag">Cooperative</span>
+                    </li>
+                    <li>
+                        <span>Win-Stay Lose-Shift (WSLS)</span>
+                        <span class="cooperative-tag">Cooperative</span>
+                    </li>
+                    <li>
+                        <span>Grim</span>
+                        <span class="defective-tag">Defective</span>
+                    </li>
+                    <li>
+                        <span>Cooperator (Cu)</span>
+                        <span class="cooperative-tag">Cooperative</span>
+                    </li>
+                    <li>
+                        <span>Forgiving TFT</span>
+                        <span class="cooperative-tag">Cooperative</span>
+                    </li>
+                    <li>
+                        <span>Random</span>
+                        <span class="defective-tag">Defective</span>
+                    </li>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card client-editor">
+            <div class="client-editor-header">
+                <div class="client-editor-title">Client Configuration</div>
+                <button id="collapseClientEditorBtn" class="btn btn-secondary">Collapse</button>
+            </div>
+            
+            <div id="clientEditorContent">
+                <div class="client-editor-grid" id="clientEditorGrid">
+                    <!-- Client strategy configuration items will be dynamically generated here -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="simulation-area">
+            <div class="simulation-canvas card">
+                <h3>Federated Learning Network</h3>
+                <div id="clientGrid"></div>
+                
+                <div class="result-panel">
+                    <div class="result-header">Simulation Results</div>
+                    <div class="stat-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="cooperationRate">0%</div>
+                            <div class="stat-label">Cooperation Rate</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalRounds">0</div>
+                            <div class="stat-label">Total Rounds</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="avgPayoff">0</div>
+                            <div class="stat-label">Avg. Payoff</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="cooperativeClients">0</div>
+                            <div class="stat-label">Cooperative Clients</div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="results-table" id="resultsTable">
+                            <thead>
+                                <tr>
+                                    <th>Client ID</th>
+                                    <th>Strategy</th>
+                                    <th>Score</th>
+                                    <th>Coop. Rate</th>
+                                    <th>Rounds</th>
+                                    <th>Selection %</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Results data will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="simulation-controls card">
+                <h3>Selected Client Info</h3>
+                <div id="clientInfo">
+                    <p>Click on a client in the grid to view details.</p>
+                </div>
+                
+                <div class="chart-container">
+                    <h3>Client Distribution</h3>
+                    <canvas id="clientDistributionChart"></canvas>
+                </div>
+                
+                <div class="moran-visualization">
+                    <h3>Moran Sampling Effect</h3>
+                    <p>Selection probability evolution over time:</p>
+                    <canvas id="moranEffectChart" class="moran-impact-chart"></canvas>
+                    
+                    <div class="probability-grid" id="probabilityGrid">
+                        <!-- Probability cells will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>FedT4T-Pro: Evolutionary Dynamics for Driving Cooperation in Federated Learning Systems</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const clientGrid = document.getElementById('clientGrid');
+            const clientCountSelect = document.getElementById('clientCountSelect');
+            const samplingMethodSelect = document.getElementById('samplingMethodSelect');
+            const resourceLevelSlider = document.getElementById('resourceLevelSlider');
+            const resourceLevelValue = document.getElementById('resourceLevelValue');
+            const resourceIndicator = document.getElementById('resourceIndicator');
+            const roundCountSlider = document.getElementById('roundCountSlider');
+            const roundCountValue = document.getElementById('roundCountValue');
+            const startSimulationBtn = document.getElementById('startSimulationBtn');
+            const pauseSimulationBtn = document.getElementById('pauseSimulationBtn');
+            const resetSimulationBtn = document.getElementById('resetSimulationBtn');
+            const cooperationRate = document.getElementById('cooperationRate');
+            const totalRounds = document.getElementById('totalRounds');
+            const avgPayoff = document.getElementById('avgPayoff');
+            const cooperativeClients = document.getElementById('cooperativeClients');
+            const clientInfo = document.getElementById('clientInfo');
+            
+            // Tab switching
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabId = btn.getAttribute('data-tab');
+                    
+                    // Remove active class from all buttons and content
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to current button and content
+                    btn.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Client Strategies
+            const strategies = [
+                { name: 'Tit for Tat', cooperative: true, defectRate: 0.2 },
+                { name: 'Win-Stay Lose-Shift', cooperative: true, defectRate: 0.35 },
+                { name: 'Grim', cooperative: false, defectRate: 0.7 },
+                { name: 'Cooperator', cooperative: true, defectRate: 0.1 },
+                { name: 'Forgiving TFT', cooperative: true, defectRate: 0.25 },
+                { name: 'Random', cooperative: false, defectRate: 0.5 }
+            ];
+            
+            // Simulation variables
+            let clients = [];
+            let connections = [];
+            let simulationInterval;
+            let roundCount = 1;
+            let maxRounds = 100;
+            let isSimulationRunning = false;
+            let selectedClientId = null;
+            let globalCooperationRate = 0;
+            let samplingMethod = 'random';
+            let resourceLevel = 1.0;
+            
+            // Chart setup
+            const ctx = document.getElementById('clientDistributionChart').getContext('2d');
+            const clientDistributionChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Cooperative', 'Defective'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: ['#34A853', '#EA4335'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            // Event Listeners
+            resourceLevelSlider.addEventListener('input', function() {
+                resourceLevel = this.value / 100;
+                resourceLevelValue.textContent = this.value + '%';
+                resourceIndicator.style.width = this.value + '%';
+                
+                if (isSimulationRunning) {
+                    updateClientBehaviors();
+                }
+            });
+            
+            roundCountSlider.addEventListener('input', function() {
+                roundCount = parseInt(this.value);
+                roundCountValue.textContent = roundCount + '/' + maxRounds;
+                updateSimulationState();
+            });
+            
+            samplingMethodSelect.addEventListener('change', function() {
+                samplingMethod = this.value;
+                if (isSimulationRunning) {
+                    // If simulation is running, apply the new sampling method
+                    selectClientsForRound();
+                }
+            });
+            
+            clientCountSelect.addEventListener('change', function() {
+                if (!isSimulationRunning) {
+                    resetSimulation();
+                }
+            });
+            
+            startSimulationBtn.addEventListener('click', function() {
+                if (!isSimulationRunning) {
+                    startSimulation();
+                } else {
+                    resumeSimulation();
+                }
+            });
+            
+            pauseSimulationBtn.addEventListener('click', function() {
+                pauseSimulation();
+            });
+            
+            resetSimulationBtn.addEventListener('click', function() {
+                resetSimulation();
+            });
+            
+            // Initialize the simulation
+            function initializeSimulation() {
+                const clientCount = parseInt(clientCountSelect.value);
+                clients = [];
+                connections = [];
+                
+                // Clear the grid
+                clientGrid.innerHTML = '';
+                
+                // Create clients
+                for (let i = 0; i < clientCount; i++) {
+                    const strategy = strategies[Math.floor(Math.random() * strategies.length)];
+                    const client = {
+                        id: i,
+                        strategy: strategy.name,
+                        cooperative: strategy.cooperative,
+                        defectRate: strategy.defectRate,
+                        x: Math.random() * (clientGrid.offsetWidth - 40) + 20,
+                        y: Math.random() * (clientGrid.offsetHeight - 40) + 20,
+                        score: 0,
+                        totalRounds: 0,
+                        cooperationCount: 0,
+                        selected: false,
+                        participating: Math.random() < 0.5,
+                        resourceConstraint: resourceLevel,
+                        adjustedDefectRate: strategy.defectRate
+                    };
+                    
+                    clients.push(client);
+                    
+                    // Create client element
+                    const clientElement = document.createElement('div');
+                    clientElement.className = 'client ' + (client.cooperative ? 'cooperative' : 'defective');
+                    clientElement.style.left = client.x + 'px';
+                    clientElement.style.top = client.y + 'px';
+                    clientElement.textContent = i;
+                    clientElement.dataset.id = i;
+                    
+                    clientElement.addEventListener('click', function() {
+                        selectClient(i);
+                    });
+                    
+                    clientGrid.appendChild(clientElement);
+                }
+                
+                // Create connections between clients
+                for (let i = 0; i < clients.length; i++) {
+                    for (let j = i + 1; j < clients.length; j++) {
+                        if (Math.random() < 0.3) { // 30% chance of connection
+                            connections.push({
+                                client1: i,
+                                client2: j,
+                                active: false
+                            });
+                            
+                            const connectionElement = document.createElement('div');
+                            connectionElement.className = 'client-connection';
+                            clientGrid.appendChild(connectionElement);
+                        }
+                    }
+                }
+                
+                // Draw connections
+                drawConnections();
+                
+                // Update statistics
+                updateStatistics();
+                
+                // Update chart
+                updateChart();
+            }
+            
+            function drawConnections() {
+                const connectionElements = document.querySelectorAll('.client-connection');
+                
+                connections.forEach((connection, index) => {
+                    const client1 = clients[connection.client1];
+                    const client2 = clients[connection.client2];
+                    
+                    const connectionElement = connectionElements[index];
+                    
+                    // Calculate the angle and length of the connection
+                    const dx = client2.x - client1.x;
+                    const dy = client2.y - client1.y;
+                    const length = Math.sqrt(dx * dx + dy * dy);
+                    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                    
+                    // Position and rotate the connection
+                    connectionElement.style.left = (client1.x + 15) + 'px';
+                    connectionElement.style.top = (client1.y + 15) + 'px';
+                    connectionElement.style.width = length + 'px';
+                    connectionElement.style.transform = `rotate(${angle}deg)`;
+                    
+                    // Set the active state
+                    connectionElement.classList.toggle('connection-active', connection.active);
+                    
+                    // Set the connection type
+                    if (connection.active) {
+                        if (clients[connection.client1].cooperative && clients[connection.client2].cooperative) {
+                            connectionElement.classList.add('connection-cooperative');
+                            connectionElement.classList.remove('connection-defective');
+                        } else {
+                            connectionElement.classList.add('connection-defective');
+                            connectionElement.classList.remove('connection-cooperative');
+                        }
+                    } else {
+                        connectionElement.classList.remove('connection-cooperative', 'connection-defective');
+                    }
+                });
+            }
+            
+            function selectClient(id) {
+                // Deselect previously selected client
+                if (selectedClientId !== null) {
+                    clients[selectedClientId].selected = false;
+                    document.querySelector(`.client[data-id="${selectedClientId}"]`).classList.remove('selected');
+                }
+                
+                // Select new client
+                selectedClientId = id;
+                clients[id].selected = true;
+                document.querySelector(`.client[data-id="${id}"]`).classList.add('selected');
+                
+                // Update client info panel
+                updateClientInfo(id);
+            }
+            
+            function updateClientInfo(id) {
+                const client = clients[id];
+                
+                let html = `
+                    <h4>Client ${id}: ${client.strategy}</h4>
+                    <p><strong>Type:</strong> ${client.cooperative ? 'Cooperative' : 'Defective'}</p>
+                    <p><strong>Score:</strong> ${client.score.toFixed(2)}</p>
+                    <p><strong>Cooperation Rate:</strong> ${client.totalRounds > 0 ? ((client.cooperationCount / client.totalRounds) * 100).toFixed(1) : 0}%</p>
+                    <p><strong>Total Rounds:</strong> ${client.totalRounds}</p>
+                    <p><strong>Resource Level:</strong> ${(client.resourceConstraint * 100).toFixed(0)}%</p>
+                    <p><strong>Adjusted Defect Rate:</strong> ${(client.adjustedDefectRate * 100).toFixed(1)}%</p>
+                    <p><strong>Status:</strong> ${client.participating ? 'Participating' : 'Not Selected'}</p>
+                `;
+                
+                clientInfo.innerHTML = html;
+            }
+            
+            function updateClientBehaviors() {
+                clients.forEach(client => {
+                    // Apply resource constraints to defect rate
+                    client.resourceConstraint = resourceLevel;
+                    
+                    // Apply synergy threshold scaling function
+                    const gamma = 8;
+                    const eLow = 0.25; // Low resource threshold
+                    const scalingFactor = 0.5 * (1 + Math.tanh(gamma * (resourceLevel - eLow)));
+                    
+                    // Adjust defect rate based on resource level and strategy
+                    client.adjustedDefectRate = client.defectRate * (1 - scalingFactor);
+                    
+                    // Update client visual
+                    const clientElement = document.querySelector(`.client[data-id="${client.id}"]`);
+                    
+                    // If resource level is too low, reduce opacity
+                    if (resourceLevel < 0.25) {
+                        clientElement.style.opacity = 0.5 + (resourceLevel * 2);
+                    } else {
+                        clientElement.style.opacity = 1;
+                    }
+                });
+            }
+            
+            function selectClientsForRound() {
+                // Reset participation status
+                clients.forEach(client => {
+                    client.participating = false;
+                });
+                
+                // Determine how many clients to select (50% of total)
+                const selectionCount = Math.max(2, Math.floor(clients.length * 0.5));
+                
+                if (samplingMethod === 'random') {
+                    // Random sampling
+                    const shuffledClients = [...clients].sort(() => Math.random() - 0.5);
+                    for (let i = 0; i < selectionCount; i++) {
+                        shuffledClients[i].participating = true;
+                    }
+                } else {
+                    // Moran sampling
+                    // Calculate fitness based on scores and cooperation behavior
+                    const minScore = Math.min(...clients.map(c => c.score));
+                    const maxScore = Math.max(...clients.map(c => c.score));
+                    
+                    // Avoid division by zero
+                    const scoreRange = maxScore - minScore > 0 ? maxScore - minScore : 1;
+                    
+                    // Calculate selection probabilities
+                    const fitnessValues = clients.map(client => {
+                        // Weight is higher if more than 50 rounds have passed
+                        const weight = roundCount > 50 ? 1.0 : 0.1;
+                        return 1 + weight * ((client.score - minScore) / scoreRange);
+                    });
+                    
+                    const totalFitness = fitnessValues.reduce((sum, value) => sum + value, 0);
+                    const probabilities = fitnessValues.map(fitness => fitness / totalFitness);
+                    
+                    // Sample clients based on probabilities
+                    const selectedIndices = [];
+                    while (selectedIndices.length < selectionCount) {
+                        const randomValue = Math.random();
+                        let cumulativeProbability = 0;
+                        
+                        for (let i = 0; i < clients.length; i++) {
+                            if (selectedIndices.includes(i)) continue;
+                            
+                            cumulativeProbability += probabilities[i];
+                            if (randomValue <= cumulativeProbability) {
+                                selectedIndices.push(i);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // Set participation status
+                    selectedIndices.forEach(index => {
+                        clients[index].participating = true;
+                    });
+                }
+                
+                // Update client visuals
+                clients.forEach(client => {
+                    const clientElement = document.querySelector(`.client[data-id="${client.id}"]`);
+                    if (client.participating) {
+                        clientElement.style.boxShadow = '0 0 10px rgba(66, 133, 244, 0.6)';
+                        clientElement.style.transform = 'scale(1.1)';
+                    } else {
+                        clientElement.style.boxShadow = 'none';
+                        clientElement.style.transform = 'scale(1)';
+                    }
+                });
+                
+                // Reset connection activity
+                connections.forEach(connection => {
+                    connection.active = false;
+                });
+                
+                // Create active connections between participating clients
+                for (let i = 0; i < clients.length; i++) {
+                    if (!clients[i].participating) continue;
+                    
+                    for (let j = i + 1; j < clients.length; j++) {
+                        if (!clients[j].participating) continue;
+                        
+                        // Find if a connection exists between these clients
+                        const connectionIndex = connections.findIndex(
+                            conn => (conn.client1 === i && conn.client2 === j) || 
+                                  (conn.client1 === j && conn.client2 === i)
+                        );
+                        
+                        if (connectionIndex !== -1) {
+                            connections[connectionIndex].active = true;
+                        }
+                    }
+                }
+                
+                // Redraw connections
+                drawConnections();
+            }
+            
+            function simulateInteractions() {
+                let totalCooperation = 0;
+                let interactionCount = 0;
+                
+                // For each active connection, simulate interaction between connected clients
+                connections.forEach(connection => {
+                    if (!connection.active) return;
+                    
+                    const client1 = clients[connection.client1];
+                    const client2 = clients[connection.client2];
+                    
+                    // Determine if clients cooperate or defect based on their adjusted defect rates
+                    const client1Defects = Math.random() < client1.adjustedDefectRate;
+                    const client2Defects = Math.random() < client2.adjustedDefectRate;
+                    
+                    // Calculate payoffs based on prisoner's dilemma matrix
+                    // R=3 (both cooperate), T=5 (defect while other cooperates), 
+                    // S=0 (cooperate while other defects), P=1 (both defect)
+                    let payoff1, payoff2;
+                    
+                    if (!client1Defects && !client2Defects) {
+                        // Both cooperate (R=3)
+                        payoff1 = 3;
+                        payoff2 = 3;
+                        totalCooperation += 2;
+                    } else if (client1Defects && !client2Defects) {
+                        // Client 1 defects, Client 2 cooperates
+                        payoff1 = 5; // T=5
+                        payoff2 = 0; // S=0
+                        totalCooperation += 1;
+                    } else if (!client1Defects && client2Defects) {
+                        // Client 1 cooperates, Client 2 defects
+                        payoff1 = 0; // S=0
+                        payoff2 = 5; // T=5
+                        totalCooperation += 1;
+                    } else {
+                        // Both defect (P=1)
+                        payoff1 = 1;
+                        payoff2 = 1;
+                    }
+                    
+                    // Update client scores and stats
+                    client1.score += payoff1;
+                    client2.score += payoff2;
+                    
+                    client1.totalRounds += 1;
+                    client2.totalRounds += 1;
+                    
+                    if (!client1Defects) client1.cooperationCount += 1;
+                    if (!client2Defects) client2.cooperationCount += 1;
+                    
+                    interactionCount += 2; // 2 clients participated
+                });
+                
+                // Calculate global cooperation rate for this round
+                if (interactionCount > 0) {
+                    globalCooperationRate = (totalCooperation / interactionCount) * 100;
+                }
+                
+                // Update statistics
+                updateStatistics();
+                
+                // Update chart
+                updateChart();
+                
+                // If a client is selected, update its info
+                if (selectedClientId !== null) {
+                    updateClientInfo(selectedClientId);
+                }
+            }
+            
+            function updateStatistics() {
+                // Calculate cooperation rate across all clients
+                let totalCooperationCount = 0;
+                let totalRoundsCount = 0;
+                let totalCooperativeClients = 0;
+                let totalScore = 0;
+                
+                clients.forEach(client => {
+                    totalCooperationCount += client.cooperationCount;
+                    totalRoundsCount += client.totalRounds;
+                    if (client.cooperative) totalCooperativeClients++;
+                    totalScore += client.score;
+                });
+                
+                const overallCooperationRate = totalRoundsCount > 0 ? 
+                    (totalCooperationCount / totalRoundsCount) * 100 : 0;
+                
+                const averagePayoff = totalRoundsCount > 0 ?
+                    totalScore / totalRoundsCount : 0;
+                
+                // Update UI
+                cooperationRate.textContent = overallCooperationRate.toFixed(1) + '%';
+                totalRounds.textContent = roundCount;
+                avgPayoff.textContent = averagePayoff.toFixed(2);
+                cooperativeClients.textContent = totalCooperativeClients;
+            }
+            
+            function updateChart() {
+                // Update client distribution chart
+                let cooperativeCount = 0;
+                let defectiveCount = 0;
+                
+                clients.forEach(client => {
+                    if (client.cooperative) {
+                        cooperativeCount++;
+                    } else {
+                        defectiveCount++;
+                    }
+                });
+                
+                clientDistributionChart.data.datasets[0].data = [cooperativeCount, defectiveCount];
+                clientDistributionChart.update();
+            }
+            
+            function startSimulation() {
+                // Initialize simulation if it's not already running
+                if (!isSimulationRunning) {
+                    initializeSimulation();
+                    roundCount = 1;
+                    roundCountSlider.value = 1;
+                    roundCountValue.textContent = '1/' + maxRounds;
+                }
+                
+                isSimulationRunning = true;
+                startSimulationBtn.textContent = 'Resume';
+                pauseSimulationBtn.disabled = false;
+                resetSimulationBtn.disabled = false;
+                roundCountSlider.disabled = false;
+                
+                // Start simulation interval
+                simulationInterval = setInterval(() => {
+                    if (roundCount > maxRounds) {
+                        pauseSimulation();
+                        return;
+                    }
+                    
+                    // Select clients for this round
+                    selectClientsForRound();
+                    
+                    // Simulate interactions
+                    simulateInteractions();
+                    
+                    // Increment round count
+                    roundCount++;
+                    roundCountSlider.value = roundCount;
+                    roundCountValue.textContent = roundCount + '/' + maxRounds;
+                    
+                    // Update UI based on current round
+                    updateSimulationState();
+                }, 1000); // 1 second per round
+            }
+            
+            function resumeSimulation() {
+                isSimulationRunning = true;
+                startSimulationBtn.textContent = 'Resume';
+                pauseSimulationBtn.disabled = false;
+                
+                // Resume simulation interval
+                simulationInterval = setInterval(() => {
+                    if (roundCount > maxRounds) {
+                        pauseSimulation();
+                        return;
+                    }
+                    
+                    // Select clients for this round
+                    selectClientsForRound();
+                    
+                    // Simulate interactions
+                    simulateInteractions();
+                    
+                    // Increment round count
+                    roundCount++;
+                    roundCountSlider.value = roundCount;
+                    roundCountValue.textContent = roundCount + '/' + maxRounds;
+                    
+                    // Update UI based on current round
+                    updateSimulationState();
+                }, 1000); // 1 second per round
+            }
+            
+            function pauseSimulation() {
+                isSimulationRunning = false;
+                clearInterval(simulationInterval);
+                startSimulationBtn.textContent = 'Resume';
+                pauseSimulationBtn.disabled = true;
+            }
+            
+            function resetSimulation() {
+                // Stop simulation if it's running
+                pauseSimulation();
+                
+                // Reset UI
+                roundCount = 1;
+                roundCountSlider.value = 1;
+                roundCountValue.textContent = '1/' + maxRounds;
+                startSimulationBtn.textContent = 'Start Simulation';
+                pauseSimulationBtn.disabled = true;
+                resetSimulationBtn.disabled = true;
+                roundCountSlider.disabled = true;
+                
+                // Reset client info
+                clientInfo.innerHTML = '<p>Click on a client in the grid to view details.</p>';
+                
+                // Clear selection
+                selectedClientId = null;
+                
+                // Initialize simulation
+                initializeSimulation();
+            }
+            
+            function updateSimulationState() {
+                // Update resource levels based on round count
+                // Resource level drops at specific round thresholds (50, 100, 150)
+                if (roundCount >= 50 && roundCount < 100) {
+                    resourceLevelSlider.value = 75;
+                    resourceLevel = 0.75;
+                } else if (roundCount >= 100 && roundCount < 150) {
+                    resourceLevelSlider.value = 50;
+                    resourceLevel = 0.5;
+                } else if (roundCount >= 150) {
+                    resourceLevelSlider.value = 25;
+                    resourceLevel = 0.25;
+                }
+                
+                resourceLevelValue.textContent = resourceLevelSlider.value + '%';
+                resourceIndicator.style.width = resourceLevelSlider.value + '%';
+                
+                // Update client behaviors based on resource level
+                updateClientBehaviors();
+                
+                // Check if simulation is complete
+                if (roundCount > maxRounds) {
+                    pauseSimulation();
+                    startSimulationBtn.disabled = true;
+                    alert('Simulation complete!');
+                }
+            }
+            
+            // Initialize
+            resetSimulation();
+        });
+    </script>
+</body>
+</html>
