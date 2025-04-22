@@ -49,8 +49,6 @@ flower_fedt4t_server = Ipd_TournamentServer(clients, sampling_strategy=my_sampli
 ```
 
 
-# Running the experiments
-
 # Bibliography
 If you find our work to be useful in your research, please cite:
 ```
