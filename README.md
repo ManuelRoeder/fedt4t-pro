@@ -1,6 +1,7 @@
-# FedT4T-Pro: Evolutionary Dynamics for Driving Cooperation in Federated Learning Systems
+# FedT4T-Pro: Driving Cooperation in Federated Learning via Evolutionary Game Theory
 
-This respository is an implementation of the algorithm proposed in the paper "**Evolutionary Dynamics for Driving Cooperation in Federated Learning Systems**".
+This respository is an implementation of the algorithm proposed in the paper "**Driving Cooperation in Federated Learning via
+Evolutionary Game Theory**".
 
 ![racf](/assets/racfl.png)
 
