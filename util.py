@@ -196,7 +196,7 @@ def exponential_scaling(res_lvl, alpha=2.0):
     - The computed result of the function
     """
     res_lvl = np.asarray(res_lvl)
-    mask = res_lvl >= ResourceLevel.EMPTY.value
+    mask = res_lvl >= ResourceLevel.LOW.value
     result = np.zeros_like(res_lvl)
     result[mask] = 1 - np.exp(-alpha * (res_lvl[mask] - ResourceLevel.LOW.value))
     return result
