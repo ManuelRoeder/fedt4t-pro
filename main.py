@@ -369,7 +369,7 @@ def get_client_strategies(exp_str, mem_depth=1, resource_awareness=False):
             if isinstance(strategy, axl.MemoryOnePlayer):
                 #selected_strategies.append(ResourceAwareMemOnePlayer(copy.deepcopy(strategy), initial_resource_value=util.ResourceLevel.LOW.value))
                 #selected_strategies.append(ResourceAwareMemOnePlayer(copy.deepcopy(strategy), initial_resource_value=util.ResourceLevel.MODERATE.value))
-                selected_strategies.append(ResourceAwareMemOnePlayer(player_instance=copy.deepcopy(strategy), resource_scaling_func=util.synergy_threshold_scaling, initial_resource_value=util.ResourceLevel.FULL.value))
+                selected_strategies.append(ResourceAwareMemOnePlayer(player_instance=copy.deepcopy(strategy), resource_scaling_func=util.linear_scaling, initial_resource_value=util.ResourceLevel.FULL.value))
         #selected_strategies.append(random_player)
         return selected_strategies
                 
@@ -377,7 +377,7 @@ def get_client_strategies(exp_str, mem_depth=1, resource_awareness=False):
 ###################### MAIN TRACK ######################
 
 # initialize strategies with memory_depth eq. 1
-client_strategies = get_client_strategies("convergence_xprobing", mem_depth=strategy_mem_depth, resource_awareness=True)
+client_strategies = get_client_strategies("m1_selected", mem_depth=strategy_mem_depth, resource_awareness=True)
 
 # mix list
 random.shuffle(client_strategies)

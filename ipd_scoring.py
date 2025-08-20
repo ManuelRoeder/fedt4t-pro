@@ -208,12 +208,13 @@ def format_ranked_payoffs_for_logging(ipd_scoreboard_dict):
         # Sum up the payoffs for this client across all rounds they participated in
         total_payoff = sum(round[5] for round in rounds)  # payoff is at index 5
 
-        # Extract strategy and resource level from the first entry (assuming they are constant)
-        strategy = rounds[0][6]  # ipd_strategy is at index 6
-        resource_level = str(rounds[0][7]) # res_level is at index 7
-
         # Calculate the number of games (rounds this client actually played)
         num_games = len(rounds)
+        
+        # Extract strategy and resource level from the first entry (assuming they are constant)
+        strategy = rounds[0][6]  # ipd_strategy is at index 6
+        resource_level = str(round(float(rounds[num_games-1][7]),2)) # res_level is at index 7
+
         
         # Calculate the average payoff, handling cases where num_games is zero
         average_payoff = total_payoff / num_games if num_games > 0 else 0

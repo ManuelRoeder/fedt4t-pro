@@ -37,7 +37,8 @@ from ipd_player import ClientShadowPlayer, ResourceAwareMemOnePlayer
 from model import Net
 import util
 
-RESOURCE_DECREASE_ENABLED = True
+DYNAMIC_ALLOC = True
+RESOURCE_DECREASE_ENABLED = False
 RES_DECREASE_ROUNDS = [15, 50, 100]
 
 class FedT4TClient(NumPyClient):
@@ -59,7 +60,7 @@ class FedT4TClient(NumPyClient):
         set_params(self.model, parameters)
         
         # decrease resource level based on server round
-        if RESOURCE_DECREASE_ENABLED:
+        if RESOURCE_DECREASE_ENABLED and not DYNAMIC_ALLOC:
             self.decrease_resources(config)
         
         # enforce cooperate/defect decision here
@@ -69,7 +70,11 @@ class FedT4TClient(NumPyClient):
         # check client resource level
         res_level = util.ResourceLevel.NONE.value
         if isinstance(self.ipd_strategy, ResourceAwareMemOnePlayer):
-            res_level = self.ipd_strategy.get_resource_level()
+            if DYNAMIC_ALLOC and cooperate:
+                res_level = self.ipd_strategy.get_resource_level() * (0.9) # reduce by 10 percent 
+            else:
+                res_level = self.ipd_strategy.get_resource_level()
+                
             
         ret_dict = {"match_id": match_id, "client_id": self.client_id, "ipd_strategy_name": self.ipd_strategy.name, "resource_level": str(res_level)}
         
@@ -118,6 +123,10 @@ class FedT4TClient(NumPyClient):
         if "match_id" in config.keys():
             match_id = config["match_id"]
             log(INFO, "Match id found %s", match_id)
+        if "dynamic_client_resource" in config.keys():
+            res_level = config["dynamic_client_resource"]
+            log(INFO, "dynamic_client_resource found %s", res_level)
+            self.ipd_strategy.set_resource_level(float(res_level))
             
         # always reset strategy history and sow seed
         self.ipd_strategy.reset()

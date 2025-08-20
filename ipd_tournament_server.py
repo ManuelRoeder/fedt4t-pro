@@ -50,6 +50,7 @@ from axelrod.action import Action
 # FedT4T framework imports
 from ipd_scoring import  format_ranked_payoffs_for_logging_2, plot_average_score_per_strategy_over_rounds, plot_cumulative_cooperations_over_rounds_with_focus, save_strategy_total_scores_over_rounds_with_focus, plot_cumulative_cooperations_over_rounds, save_strategy_score_differences_matrix2, save_average_score_per_client_over_rounds, save_strategy_total_scores_over_rounds, update_scoreboard, get_ipd_score, format_ranked_payoffs_for_logging, get_clients_score_overview, plot_interaction_graph
 from util import generate_hash, actions_to_string, ClientSamplingStrategy, moran_sampling
+import util
 from ipd_tournament_strategy import Ipd_TournamentStrategy
 
 USE_CANTOR_PAIRING = False # use cantor hashing or free-text transmission of match id
@@ -124,6 +125,7 @@ class Ipd_TournamentServer(Server):
         self.ipd_scoreboard_dict = dict()
         self.num_fl_rounds = num_rounds
         self.sampling_strategy = sampling_strategy
+        self.client_resource_tracker = dict()
         
     def fit_round(
         self,
@@ -266,6 +268,18 @@ class Ipd_TournamentServer(Server):
             # attach server round
             new_client_instructions[player_1[0]][1].config["server_round"] = str(server_round)
             new_client_instructions[player_2[0]][1].config["server_round"] = str(server_round)
+            # dynamic resource allocation(tracked by server, reduced on client)
+            if id_p1 in self.client_resource_tracker.keys():
+                new_client_instructions[player_1[0]][1].config["dynamic_client_resource"] = str(self.client_resource_tracker[id_p1])
+                
+            else:
+                new_client_instructions[player_1[0]][1].config["dynamic_client_resource"] = str(util.ResourceLevel.FULL.value)
+                
+            if id_p2 in self.client_resource_tracker.keys():
+                new_client_instructions[player_2[0]][1].config["dynamic_client_resource"] = str(self.client_resource_tracker[id_p2])
+            else:
+                new_client_instructions[player_2[0]][1].config["dynamic_client_resource"] = str(util.ResourceLevel.FULL.value)
+                
         return new_client_instructions
             
 
@@ -320,6 +334,10 @@ class Ipd_TournamentServer(Server):
                     c2_ipd_strategy = metrics_2["ipd_strategy_name"]
                     c1_res_level = metrics_1["resource_level"]
                     c2_res_level = metrics_2["resource_level"]
+                    # update resource tracker
+                    self.client_resource_tracker[c1_id] = c1_res_level
+                    self.client_resource_tracker[c2_id] = c2_res_level
+                    
                     update_scoreboard(self.ipd_scoreboard_dict, match_id, (c1_id, action_c1, score_c1, c1_ipd_strategy, c1_res_level), (c2_id, action_c2, score_c2, c2_ipd_strategy, c2_res_level), server_round)
                     self.matchmaking_dict[match_id] = (history_c1, history_c2)
             else:

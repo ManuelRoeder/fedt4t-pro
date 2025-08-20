@@ -53,6 +53,10 @@ class ClientSamplingStrategy(Enum):
     RANDOM = 1
     MORAN = 2
     
+class ResourceAllocationType(Enum):
+    NONE = 1
+    STATIC = 2
+    DYNAMIC = 2
 
 class ResourceLevel(float, Enum):
     NONE = -1.0
